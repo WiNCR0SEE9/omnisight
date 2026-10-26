@@ -1,0 +1,183 @@
+{
+  "created": "2026-10-25T00:19:49",
+  "sklearn_version": "1.9.1",
+  "target": "Next month's rainfall is in the lowest third of that calendar month in 1991-2015 (per city). Forecast made at the end of months [4, 5, 6, 7, 8, 9].",
+  "dry_quantile": 0.333,
+  "features": [
+    "rain_1m_z",
+    "rain_3m_z",
+    "rain_6m_z",
+    "tmax_30d_z",
+    "dry_run_60",
+    "month_sin",
+    "month_cos"
+  ],
+  "train_years": [
+    1991,
+    2015
+  ],
+  "test_years": [
+    2016,
+    2026
+  ],
+  "train_rows": 740,
+  "test_rows": 325,
+  "dry_share_train": 0.314,
+  "dry_share_test": 0.175,
+  "chosen_model": "Logistic regression",
+  "chosen_setting": "C=1.0",
+  "cross_validation": [
+    {
+      "family": "Logistic regression",
+      "setting": "C=0.1",
+      "cv_auc": 0.524
+    },
+    {
+      "family": "Logistic regression",
+      "setting": "C=1.0",
+      "cv_auc": 0.528
+    },
+    {
+      "family": "Random forest",
+      "setting": "max_depth=3",
+      "cv_auc": 0.495
+    },
+    {
+      "family": "Random forest",
+      "setting": "max_depth=5",
+      "cv_auc": 0.481
+    },
+    {
+      "family": "Gradient boosting",
+      "setting": "max_depth=1",
+      "cv_auc": 0.517
+    },
+    {
+      "family": "Gradient boosting",
+      "setting": "max_depth=2",
+      "cv_auc": 0.504
+    }
+  ],
+  "test_results": {
+    "Logistic regression": {
+      "setting": "C=1.0",
+      "cv_auc": 0.528,
+      "roc_auc": 0.576,
+      "auc_ci95": [
+        0.406,
+        0.739
+      ],
+      "balanced_acc": 0.61,
+      "precision": 0.268,
+      "recall": 0.526,
+      "f1": 0.355,
+      "f1_ci95": [
+        0.196,
+        0.505
+      ],
+      "confusion": {
+        "TP": 30,
+        "FP": 82,
+        "FN": 27,
+        "TN": 186
+      }
+    },
+    "Random forest": {
+      "setting": "max_depth=3",
+      "cv_auc": 0.495,
+      "roc_auc": 0.582,
+      "auc_ci95": [
+        0.451,
+        0.709
+      ],
+      "balanced_acc": 0.565,
+      "precision": 0.21,
+      "recall": 0.649,
+      "f1": 0.318,
+      "f1_ci95": [
+        0.194,
+        0.449
+      ],
+      "confusion": {
+        "TP": 37,
+        "FP": 139,
+        "FN": 20,
+        "TN": 129
+      }
+    },
+    "Gradient boosting": {
+      "setting": "max_depth=1",
+      "cv_auc": 0.517,
+      "roc_auc": 0.599,
+      "auc_ci95": [
+        0.494,
+        0.713
+      ],
+      "balanced_acc": 0.563,
+      "precision": 0.208,
+      "recall": 0.667,
+      "f1": 0.317,
+      "f1_ci95": [
+        0.199,
+        0.445
+      ],
+      "confusion": {
+        "TP": 38,
+        "FP": 145,
+        "FN": 19,
+        "TN": 123
+      }
+    }
+  },
+  "permutation_importance": [
+    {
+      "feature": "tmax_30d_z",
+      "meaning": "Last 30 days' max temperature vs normal (std devs)",
+      "auc_drop": 0.1117,
+      "std": 0.0385
+    },
+    {
+      "feature": "rain_3m_z",
+      "meaning": "Last 3 months' rain vs normal (std devs)",
+      "auc_drop": 0.0452,
+      "std": 0.0241
+    },
+    {
+      "feature": "dry_run_60",
+      "meaning": "Longest dry spell in last 60 days (days)",
+      "auc_drop": 0.0037,
+      "std": 0.0092
+    },
+    {
+      "feature": "rain_1m_z",
+      "meaning": "Last month's rain vs normal (std devs)",
+      "auc_drop": 0.0003,
+      "std": 0.0115
+    },
+    {
+      "feature": "rain_6m_z",
+      "meaning": "Last 6 months' rain vs normal (std devs)",
+      "auc_drop": -0.0052,
+      "std": 0.0361
+    },
+    {
+      "feature": "month_cos",
+      "meaning": "Time of year (cos)",
+      "auc_drop": -0.006,
+      "std": 0.0054
+    },
+    {
+      "feature": "month_sin",
+      "meaning": "Time of year (sin)",
+      "auc_drop": -0.0299,
+      "std": 0.0155
+    }
+  ],
+  "limitations": [
+    "Rainfall data is ERA5 reanalysis (a gridded model estimate), not station measurements.",
+    "Only 5 cities and 10-11 test years; cities in one year share a monsoon, so real sample size is small.",
+    "The score is a model score, not a calibrated probability that the month will be dry.",
+    "'Dry' is relative to 1991-2015 normals; it is not an official drought declaration.",
+    "Predicts rainfall only. It does not predict groundwater, crop yield or actual water shortage."
+  ]
+}

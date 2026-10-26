@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OMNISIGHT</title>
+  <meta name="description" content="How dry is Madhya Pradesh right now? An explainable water-stress risk indicator for five cities.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='11' y='3' width='10' height='26' rx='5' fill='%230b2f3a'/%3E%3Crect x='11' y='16' width='10' height='13' rx='5' fill='%2334a7bf'/%3E%3C/svg%3E">
+  <!-- Font loads only if online; the page looks fine without it -->
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#top">OMNISIGHT</a>
+    <nav aria-label="Sections">
+      <a href="#cities">Cities</a>
+      <a href="#detail">City detail</a>
+      <a href="#next">Next month</a>
+      <a href="#unusual">Unusual months</a>
+      <a href="#validation">How we checked</a>
+      <a href="#lab">Scenario lab</a>
+      <a href="#about">Method</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" id="cities" aria-labelledby="hero-title">
+      <canvas id="rain-canvas" class="rain" aria-hidden="true"></canvas>
+      <div class="hero-copy">
+        <h1 id="hero-title">How dry is Madhya Pradesh right now?</h1>
+        <p class="lede">OMNISIGHT compares the last three months of rain and heat in five cities with their
+          1991&ndash;2020 normal, and shows how it reached each score.</p>
+        <p class="caution">A risk indicator built from past weather. It is not a forecast and not an official warning.</p>
+        <p class="asof" id="asof" aria-live="polite">Loading the latest data&hellip;</p>
+        <p class="update"><button type="button" id="update-btn">Update data</button><span id="update-msg" role="status"></span></p>
+      </div>
+
+      <div class="gauges" id="gauges" role="list" aria-label="Rain in the last three months compared with normal, by city"></div>
+
+      <p class="gauge-key">The water level is the rain of the last three months. The dashed line is the normal for
+        this time of year. The number is the risk score out of 100.</p>
+      <p class="hero-link"><a href="#detail" id="detail-link">See how the score is built</a></p>
+      <p class="rain-note" id="rain-note"></p>
+    </section>
+
+    <section class="band detail" id="detail" aria-live="polite"></section>
+    <section class="band next" id="next" aria-live="polite"></section>
+    <section class="band unusual" id="unusual" aria-live="polite"></section>
+    <section class="band validation" id="validation" aria-live="polite"></section>
+    <section class="lab" id="lab" aria-live="polite"></section>
+
+    <section class="about" id="about">
+      <div class="wrap">
+        <h2>Method and scope</h2>
+        <div class="about-grid">
+          <div>
+            <h3>Built to be checked</h3>
+            <ul>
+              <li><b>Real data.</b> Daily rain and maximum temperature since 1991 for five cities, more than
+                13,000 days each, from the Open-Meteo Historical Weather API (ERA5 reanalysis, a gridded model
+                estimate). Weather data by <a href="https://open-meteo.com/">Open-Meteo.com</a>, CC BY 4.0.</li>
+              <li><b>Every score shows its working.</b> Three indicators, the points each one adds, and the
+                1991&ndash;2020 normal they are measured against.</li>
+              <li><b>The model is tested on years it never saw.</b> It trains on 1991&ndash;2015 and is scored on
+                2016 onward. The normals use training years only, and automated tests confirm that no future data
+                leaks in.</li>
+              <li><b>Unusual months are found two ways</b>, and every flag lists the evidence behind it.</li>
+              <li><b>Scenarios are kept apart.</b> Observed data, model output, simulation and your own assumptions
+                are labelled separately.</li>
+              <li><b>Runs on a laptop</b> with the saved data, without internet.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Scope</h3>
+            <ul>
+              <li>The risk score describes the last three months. It is an indicator, not a forecast or an
+                official warning.</li>
+              <li>It uses rain and temperature only. Groundwater, reservoir levels and water demand are not
+                included yet.</li>
+              <li>The weights (50% rain, 25% heat, 25% dry spell) and the level boundaries are design choices.</li>
+              <li>The next-month model is a research feature. Its measured skill is modest, and its test result is
+                shown openly in the Next month section.</li>
+              <li>City positions are approximate points, not district boundaries.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">OMNISIGHT &middot; built for STEAM Innovation League 2.0 &middot; SDGs 6, 11 and 13</div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

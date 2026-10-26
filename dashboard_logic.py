@@ -94,6 +94,25 @@ def recent_spi(df, params, as_of, from_year=2010):
     return s[s.index.year >= from_year]
 
 
+def recent_days(df, n=45):
+    """The newest n days in the saved data."""
+    return df.tail(n).reset_index(drop=True)
+
+
+def summarize_update(results):
+    """One plain sentence about what update_all() did."""
+    errs = [r for r in results if r["status"] == "error"]
+    if results and len(errs) == len(results):
+        return ("Could not reach Open-Meteo (are you offline?). The saved data is unchanged. "
+                "First error: " + errs[0]["error"])
+    added = sum(r.get("added", 0) for r in results)
+    last = max(r["last_date"] for r in results if "last_date" in r)
+    msg = f"Added {added} new day(s) across the cities. The data now runs through {last}."
+    if errs:
+        msg += f" Failed for: {', '.join(r['city'] for r in errs)}."
+    return msg
+
+
 def top_history(hist, city, n=5):
     g = hist[hist["city"] == city].nlargest(n, "score")
     return g[["year", "jas_rain_mm", "spi3", "heat_z", "dry_run_days", "score", "level"]].reset_index(drop=True)
@@ -179,8 +198,11 @@ def report_text(city, res, weights, top_years=None):
         "Standardized Precipitation Index (SPI).",
     ]
     if top_years is not None and len(top_years):
+        pretty = top_years.rename(columns={
+            "year": "Year", "jas_rain_mm": "Jul-Sep rain (mm)", "spi3": "SPI-3", "heat_z": "Heat (std dev)",
+            "dry_run_days": "Longest dry spell (days)", "score": "Score", "level": "Level"})
         lines += ["", "## Highest-risk years since 1991 (same method, as of 30 September)",
-                  _md_table(top_years), "",
+                  _md_table(pretty), "",
                   "These years use the same 1991-2020 baseline that defines normal, so this is a sanity "
                   "check against documented dry years, not a test on unseen data."]
     return "\n".join(lines)

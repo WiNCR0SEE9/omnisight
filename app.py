@@ -16,6 +16,7 @@ import dashboard_logic as dl
 from fetch_data import CITIES
 from indicators import fit_spi_params
 from risk_engine import LEVELS, WEIGHTS, assess_city
+from update_data import update_all
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(HERE, "data")
@@ -66,7 +67,7 @@ st.sidebar.caption("Explainable water-stress risk indicator · Madhya Pradesh pi
 city = st.sidebar.selectbox("City (for the detail tabs)", cities)
 st.sidebar.warning("This is a risk indicator built from past weather data. It is not a forecast and not an "
                    "official warning. Weather data alone cannot establish actual water scarcity.")
-with st.sidebar.expander("Score weights (design assumptions)"):
+with st.sidebar.expander("Score weights"):
     st.write(pd.DataFrame({
         "Factor": [dl.FACTOR_LABELS[k] for k in WEIGHTS],
         "Weight": [f"{v:.0%}" for v in WEIGHTS.values()],
@@ -75,6 +76,16 @@ with st.sidebar.expander("Score weights (design assumptions)"):
                "These are assumptions, not calibrated values.")
 st.sidebar.caption("Weather data: Open-Meteo.com (CC BY 4.0). ERA5 reanalysis, a gridded estimate, "
                    "not a station measurement.")
+st.sidebar.markdown("---")
+st.sidebar.caption(f"Saved data runs through {data[cities[0]]['date'].max().date()}.")
+if st.sidebar.button("Update data from Open-Meteo"):
+    with st.spinner("Downloading the newest days..."):
+        outcome = update_all(DATA_DIR)
+    st.session_state["update_msg"] = dl.summarize_update(outcome)
+    st.cache_data.clear()
+    st.rerun()
+if st.session_state.get("update_msg"):
+    st.sidebar.info(st.session_state["update_msg"])
 
 st.title("OMNISIGHT")
 st.caption(f"REAL DATA (reanalysis) · 1991 to {data[cities[0]]['date'].max().date()} · "
@@ -127,6 +138,15 @@ with tab_city:
         fig.add_hline(y=y, line_dash="dot", annotation_text=label)
     fig.update_layout(title="3-month SPI since 2010 (months with enough rain history)", yaxis_title="SPI-3")
     st.plotly_chart(fig)
+
+    recent = dl.recent_days(data[city], 45)
+    st.markdown(f"**Newest days in the saved data** ({recent['date'].min().date()} to "
+                f"{recent['date'].max().date()})")
+    r1, r2 = st.columns(2)
+    r1.plotly_chart(px.bar(recent, x="date", y="rain_mm", title="Daily rain (mm)"))
+    r2.plotly_chart(px.line(recent, x="date", y="tmax_c", title="Daily maximum temperature (°C)"))
+    st.caption("The score only uses complete months, so these days do not change it until the month ends. "
+               "Use 'Update data from Open-Meteo' in the sidebar to fetch newer days.")
 
     if hist is not None:
         h = hist[hist["city"] == city]
@@ -201,7 +221,7 @@ with tab_report:
     st.markdown(text)
     st.download_button("Download this report (Markdown)", text, file_name=f"omnisight_{city.lower()}_report.md")
 
-# ---------- 6. validation (limited) ----------
+# ---------- 6. validation ----------
 with tab_val:
     st.subheader("How does the score compare with documented dry years?")
     if hist is None:
